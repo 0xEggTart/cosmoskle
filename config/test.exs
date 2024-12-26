@@ -42,7 +42,9 @@ config :cosmoskle, :wallet, Cosmoskle.WalletMock
 # Add these configurations
 config :cosmoskle, :wallet_module, Cosmoskle.WalletMock
 
-# Ensure Mox is configured for async tests
-config :mox, :mox,
-  server: false,
-  verify_on_exit: true
+# Configure Mox
+config :mox,
+  mox: [
+    server: false,
+    verify_on_exit: true
+  ]

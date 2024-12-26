@@ -10,10 +10,13 @@ defmodule Cosmoskle.WalletMockCase do
     quote do
       import Mox
       
-      # Verify that the mock is valid when the test exits
+      # Make sure mocks are verified when the test exits
       setup :verify_on_exit!
       
-      # Allow non-global functions to be mocked
+      # Allow the mock to be shared between processes
+      setup :set_mox_from_context
+
+      # Stub the mock implementation to fall back to the real module
       setup do
         Mox.stub_with(Cosmoskle.WalletMock, Cosmoskle.Wallet)
         :ok

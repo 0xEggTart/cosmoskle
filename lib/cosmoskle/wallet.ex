@@ -10,35 +10,44 @@ defmodule Cosmoskle.Wallet do
 
   # Client API
 
-  def start_link(_opts) do
-    GenServer.start_link(__MODULE__, %__MODULE__{}, name: __MODULE__)
+  def start_link(opts) do
+    name = Keyword.get(opts, :name, __MODULE__)
+    GenServer.start_link(__MODULE__, %__MODULE__{}, name: name)
   end
 
   @impl Cosmoskle.WalletBehaviour
-  def connect do
-    GenServer.call(__MODULE__, :connect)
+  def connect(server \\ __MODULE__) do
+    GenServer.call(server, :connect)
   end
 
   @impl Cosmoskle.WalletBehaviour
-  def disconnect do
-    GenServer.call(__MODULE__, :disconnect)
+  def disconnect(server \\ __MODULE__) do
+    GenServer.call(server, :disconnect)
   end
 
   @impl Cosmoskle.WalletBehaviour
-  def connected? do
-    GenServer.call(__MODULE__, :connected?)
+  def connected?(server \\ __MODULE__) do
+    try do
+      GenServer.call(server, :connected?)
+    catch
+      :exit, _ -> false
+    end
   end
 
   @impl Cosmoskle.WalletBehaviour
-  def get_address do
-    GenServer.call(__MODULE__, :get_address)
+  def get_address(server \\ __MODULE__) do
+    try do
+      GenServer.call(server, :get_address)
+    catch
+      :exit, _ -> nil
+    end
   end
 
   # Server Callbacks
 
   @impl GenServer
-  def init(state) do
-    {:ok, state}
+  def init(_state) do
+    {:ok, %__MODULE__{connected?: false, address: nil}}
   end
 
   @impl GenServer
