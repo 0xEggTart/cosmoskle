@@ -35,3 +35,14 @@ config :phoenix, :plug_init_mode, :runtime
 # Enable helpful, but potentially expensive runtime checks
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
+
+# Add this to your existing config/test.exs file
+config :cosmoskle, :wallet, Cosmoskle.WalletMock
+
+# Add these configurations
+config :cosmoskle, :wallet_module, Cosmoskle.WalletMock
+
+# Ensure Mox is configured for async tests
+config :mox, :mox,
+  server: false,
+  verify_on_exit: true

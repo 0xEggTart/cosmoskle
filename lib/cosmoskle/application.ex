@@ -17,7 +17,8 @@ defmodule Cosmoskle.Application do
       # Start a worker by calling: Cosmoskle.Worker.start_link(arg)
       # {Cosmoskle.Worker, arg},
       # Start to serve requests, typically the last entry
-      CosmoskleWeb.Endpoint
+      CosmoskleWeb.Endpoint,
+      Cosmoskle.Wallet
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
