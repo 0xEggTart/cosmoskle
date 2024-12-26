@@ -16,3 +16,7 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
   * Docs: https://hexdocs.pm/phoenix
   * Forum: https://elixirforum.com/c/phoenix-forum
   * Source: https://github.com/phoenixframework/phoenix
+
+
+[![Elixir CI](https://github.com/YourGitHubUsername/cosmoskle/actions/workflows/elixir.yml/badge.svg)](https://github.com/YourGitHubUsername/cosmoskle/actions/workflows/elixir.yml)
+[![Coverage Status](https://coveralls.io/repos/github/YourGitHubUsername/cosmoskle/badge.svg?branch=main)](https://coveralls.io/github/YourGitHubUsername/cosmoskle?branch=main)
