@@ -15,8 +15,11 @@ defmodule Cosmoskle.MixProject do
         coveralls: :test,
         "coveralls.detail": :test,
         "coveralls.post": :test,
-        "coveralls.html": :test
-      ]
+        "coveralls.html": :test,
+        "coveralls.github": :test
+      ],
+      source_url: "https://github.com/YourGitHubUsername/cosmoskle",
+      homepage_url: "https://github.com/YourGitHubUsername/cosmoskle"
     ]
   end
 
