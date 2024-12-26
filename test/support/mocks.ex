@@ -1,1 +1,1 @@
-Mox.defmock(Cosmoskle.WalletMock, for: Cosmoskle.WalletBehaviour) 
+Mox.defmock(Cosmoskle.WalletMock, for: Cosmoskle.WalletBehaviour)

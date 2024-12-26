@@ -58,6 +58,7 @@ defmodule Cosmoskle.Wallet do
       address: "cosmos123456789abcdefghijklmnopqrstuvwxyz1234",
       connected?: true
     }
+
     {:reply, {:ok, new_state}, new_state}
   end
 
@@ -76,4 +77,4 @@ defmodule Cosmoskle.Wallet do
   def handle_call(:get_address, _from, state) do
     {:reply, state.address, state}
   end
-end 
+end

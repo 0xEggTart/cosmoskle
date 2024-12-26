@@ -9,10 +9,10 @@ defmodule Cosmoskle.WalletMockCase do
   using do
     quote do
       import Mox
-      
+
       # Make sure mocks are verified when the test exits
       setup :verify_on_exit!
-      
+
       # Allow the mock to be shared between processes
       setup :set_mox_from_context
 
@@ -23,4 +23,4 @@ defmodule Cosmoskle.WalletMockCase do
       end
     end
   end
-end 
+end
