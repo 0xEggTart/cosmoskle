@@ -18,6 +18,7 @@ defmodule CosmoskleWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    live "/wallet", WalletLive
   end
 
   # Other scopes may use custom stacks.

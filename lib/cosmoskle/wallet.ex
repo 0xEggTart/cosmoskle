@@ -51,7 +51,7 @@ defmodule Cosmoskle.Wallet do
   end
 
   @impl GenServer
-  def handle_call(:connect, _from, _state) do
+  def handle_call(:connect, _from, state) do
     case connect_to_keplr() do
       {:ok, address} ->
         new_state = %__MODULE__{
@@ -62,20 +62,7 @@ defmodule Cosmoskle.Wallet do
         {:reply, {:ok, new_state}, new_state}
 
       {:error, reason} ->
-        {:reply, {:error, reason}, _state}
-    end
-  end
-
-  defp connect_to_keplr do
-    case Phoenix.LiveView.JS.exec("connectKeplr", to: "#wallet-connect") do
-      %{"ok" => true, "address" => address} ->
-        {:ok, address}
-
-      %{"ok" => false, "error" => error} ->
-        {:error, String.to_atom(error)}
-
-      _ ->
-        {:error, :network_error}
+        {:reply, {:error, reason}, state}
     end
   end
 
@@ -93,5 +80,18 @@ defmodule Cosmoskle.Wallet do
   @impl GenServer
   def handle_call(:get_address, _from, state) do
     {:reply, state.address, state}
+  end
+
+  defp connect_to_keplr do
+    case Phoenix.LiveView.JS.exec("connectKeplr", to: "#wallet-connect") do
+      %{"ok" => true, "address" => address} ->
+        {:ok, address}
+
+      %{"ok" => false, "error" => error} ->
+        {:error, String.to_atom(error)}
+
+      _ ->
+        {:error, :network_error}
+    end
   end
 end
