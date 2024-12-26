@@ -9,7 +9,9 @@ import Config
 
 config :cosmoskle,
   ecto_repos: [Cosmoskle.Repo],
-  generators: [timestamp_type: :utc_datetime, binary_id: true]
+  generators: [timestamp_type: :utc_datetime, binary_id: true],
+  chain_id: "cosmoshub-4",
+  rpc_url: "https://rpc.cosmoshub.strange.love:443"
 
 # Configures the endpoint
 config :cosmoskle, CosmoskleWeb.Endpoint,

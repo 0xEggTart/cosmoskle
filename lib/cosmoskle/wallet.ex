@@ -52,14 +52,31 @@ defmodule Cosmoskle.Wallet do
 
   @impl GenServer
   def handle_call(:connect, _from, _state) do
-    # TODO: Implement actual Keplr wallet connection
-    # For now, return mock data for testing
-    new_state = %__MODULE__{
-      address: "cosmos123456789abcdefghijklmnopqrstuvwxyz1234",
-      connected?: true
-    }
+    case connect_to_keplr() do
+      {:ok, address} ->
+        new_state = %__MODULE__{
+          address: address,
+          connected?: true
+        }
 
-    {:reply, {:ok, new_state}, new_state}
+        {:reply, {:ok, new_state}, new_state}
+
+      {:error, reason} ->
+        {:reply, {:error, reason}, _state}
+    end
+  end
+
+  defp connect_to_keplr do
+    case Phoenix.LiveView.JS.exec("connectKeplr", to: "#wallet-connect") do
+      %{"ok" => true, "address" => address} ->
+        {:ok, address}
+
+      %{"ok" => false, "error" => error} ->
+        {:error, String.to_atom(error)}
+
+      _ ->
+        {:error, :network_error}
+    end
   end
 
   @impl GenServer

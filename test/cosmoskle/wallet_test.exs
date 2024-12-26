@@ -7,6 +7,9 @@ defmodule Cosmoskle.WalletTest do
 
   alias Cosmoskle.Wallet
 
+  # Add mock for Phoenix.LiveView.JS
+  import Mock
+
   setup do
     # Create a unique name for each test's GenServer
     wallet_name = :"Wallet#{System.unique_integer()}"
@@ -29,75 +32,76 @@ defmodule Cosmoskle.WalletTest do
 
   describe "wallet connection" do
     test "connect/0 successfully connects to Keplr wallet", %{wallet: wallet} do
-      # Set up mock for just the connect call
-      expect(Cosmoskle.WalletMock, :connect, fn ^wallet ->
-        {:ok, %Wallet{address: "cosmos123456789abcdefghijklmnopqrstuvwxyz1234", connected?: true}}
-      end)
+      with_mock Phoenix.LiveView.JS,
+        exec: fn "connectKeplr", [to: "#wallet-connect"] ->
+          %{"ok" => true, "address" => "cosmos123456789abcdefghijklmnopqrstuvwxyz1234"}
+        end do
+        {:ok, wallet_state} = Wallet.connect(wallet)
 
-      {:ok, wallet_state} = Cosmoskle.WalletMock.connect(wallet)
-
-      assert wallet_state.address != nil
-      assert String.starts_with?(wallet_state.address, "cosmos")
-      assert String.length(wallet_state.address) == 45
-      assert wallet_state.connected? == true
+        assert wallet_state.address != nil
+        assert String.starts_with?(wallet_state.address, "cosmos")
+        assert String.length(wallet_state.address) == 45
+        assert wallet_state.connected? == true
+      end
     end
 
     test "connect/0 returns error when Keplr wallet is not installed", %{wallet: wallet} do
-      expect(Cosmoskle.WalletMock, :connect, fn ^wallet ->
-        {:error, :wallet_not_found}
-      end)
-
-      assert {:error, :wallet_not_found} = Cosmoskle.WalletMock.connect(wallet)
+      with_mock Phoenix.LiveView.JS,
+        exec: fn "connectKeplr", [to: "#wallet-connect"] ->
+          %{"ok" => false, "error" => "wallet_not_found"}
+        end do
+        assert {:error, :wallet_not_found} = Wallet.connect(wallet)
+      end
     end
 
     test "connect/0 returns error when user rejects connection", %{wallet: wallet} do
-      expect(Cosmoskle.WalletMock, :connect, fn ^wallet ->
-        {:error, :user_rejected}
-      end)
-
-      assert {:error, :user_rejected} = Cosmoskle.WalletMock.connect(wallet)
+      with_mock Phoenix.LiveView.JS,
+        exec: fn "connectKeplr", [to: "#wallet-connect"] ->
+          %{"ok" => false, "error" => "user_rejected"}
+        end do
+        assert {:error, :user_rejected} = Wallet.connect(wallet)
+      end
     end
 
     test "disconnect/0 successfully disconnects wallet", %{wallet: wallet} do
-      # First mock the connect call
-      expect(Cosmoskle.WalletMock, :connect, fn ^wallet ->
-        {:ok, %Wallet{address: "cosmos123456789abcdefghijklmnopqrstuvwxyz1234", connected?: true}}
-      end)
+      # First connect
+      with_mock Phoenix.LiveView.JS,
+        exec: fn "connectKeplr", [to: "#wallet-connect"] ->
+          %{"ok" => true, "address" => "cosmos123456789abcdefghijklmnopqrstuvwxyz1234"}
+        end do
+        {:ok, wallet_state} = Wallet.connect(wallet)
+        assert wallet_state.connected? == true
 
-      {:ok, wallet_state} = Cosmoskle.WalletMock.connect(wallet)
-      assert wallet_state.connected? == true
-
-      # Then mock the disconnect call
-      expect(Cosmoskle.WalletMock, :disconnect, fn ^wallet ->
-        :ok
-      end)
-
-      :ok = Cosmoskle.WalletMock.disconnect(wallet)
-      assert Wallet.connected?(wallet) == false
+        :ok = Wallet.disconnect(wallet)
+        assert Wallet.connected?(wallet) == false
+      end
     end
 
     test "connect/0 returns error with invalid chain ID", %{wallet: wallet} do
-      expect(Cosmoskle.WalletMock, :connect, fn ^wallet ->
-        {:error, :invalid_chain}
-      end)
-
-      assert {:error, :invalid_chain} = Cosmoskle.WalletMock.connect(wallet)
+      with_mock Phoenix.LiveView.JS,
+        exec: fn "connectKeplr", [to: "#wallet-connect"] ->
+          %{"ok" => false, "error" => "invalid_chain"}
+        end do
+        assert {:error, :invalid_chain} = Wallet.connect(wallet)
+      end
     end
 
     test "connect/0 returns error when wallet is locked", %{wallet: wallet} do
-      expect(Cosmoskle.WalletMock, :connect, fn ^wallet ->
-        {:error, :wallet_locked}
-      end)
-
-      assert {:error, :wallet_locked} = Cosmoskle.WalletMock.connect(wallet)
+      with_mock Phoenix.LiveView.JS,
+        exec: fn "connectKeplr", [to: "#wallet-connect"] ->
+          %{"ok" => false, "error" => "wallet_locked"}
+        end do
+        assert {:error, :wallet_locked} = Wallet.connect(wallet)
+      end
     end
 
     test "connect/0 returns error on network issues", %{wallet: wallet} do
-      expect(Cosmoskle.WalletMock, :connect, fn ^wallet ->
-        {:error, :network_error}
-      end)
-
-      assert {:error, :network_error} = Cosmoskle.WalletMock.connect(wallet)
+      with_mock Phoenix.LiveView.JS,
+        exec: fn "connectKeplr", [to: "#wallet-connect"] ->
+          %{"ok" => false, "error" => "network_error"}
+        end do
+        assert {:error, :network_error} = Wallet.connect(wallet)
+      end
     end
   end
 
@@ -163,26 +167,24 @@ defmodule Cosmoskle.WalletTest do
 
   describe "wallet validation" do
     test "validates cosmos address format", %{wallet: wallet} do
-      address = "cosmos123456789abcdefghijklmnopqrstuvwxyz1234"
-
-      expect(Cosmoskle.WalletMock, :connect, fn ^wallet ->
-        {:ok, %Wallet{address: address, connected?: true}}
-      end)
-
-      {:ok, wallet_state} = Cosmoskle.WalletMock.connect(wallet)
-      assert String.match?(wallet_state.address, ~r/^cosmos[0-9a-z]{39}$/)
+      with_mock Phoenix.LiveView.JS,
+        exec: fn "connectKeplr", [to: "#wallet-connect"] ->
+          %{"ok" => true, "address" => "cosmos123456789abcdefghijklmnopqrstuvwxyz1234"}
+        end do
+        {:ok, wallet_state} = Wallet.connect(wallet)
+        assert String.match?(wallet_state.address, ~r/^cosmos[0-9a-z]{39}$/)
+      end
     end
 
     test "validates address checksum", %{wallet: wallet} do
-      address = "cosmos123456789abcdefghijklmnopqrstuvwxyz1234"
-
-      expect(Cosmoskle.WalletMock, :connect, fn ^wallet ->
-        {:ok, %Wallet{address: address, connected?: true}}
-      end)
-
-      {:ok, wallet_state} = Cosmoskle.WalletMock.connect(wallet)
-      assert String.length(wallet_state.address) == 45
-      assert String.starts_with?(wallet_state.address, "cosmos")
+      with_mock Phoenix.LiveView.JS,
+        exec: fn "connectKeplr", [to: "#wallet-connect"] ->
+          %{"ok" => true, "address" => "cosmos123456789abcdefghijklmnopqrstuvwxyz1234"}
+        end do
+        {:ok, wallet_state} = Wallet.connect(wallet)
+        assert String.length(wallet_state.address) == 45
+        assert String.starts_with?(wallet_state.address, "cosmos")
+      end
     end
   end
 end
